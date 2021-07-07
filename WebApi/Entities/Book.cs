@@ -1,5 +1,5 @@
 using System;
- namespace WebApi
+ namespace WebApi.Entities
 {
     public class Book
     {

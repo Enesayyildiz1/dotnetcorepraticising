@@ -2,45 +2,54 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using WebApi;
+using AutoMapper;
 using WebApi.Common;
 using WebApi.DataAccess;
+using FluentValidation.Results;
+using FluentValidation;
+using WebApi.Entities;
 
 namespace WebApi.BusinessLogic
 {
     public class BookManager
     {
         private readonly BookStoreDbContext _dbContext;
-
-        public BookManager(BookStoreDbContext dbContext)
+        private readonly IMapper _mapper;
+        BookValidator validator=new BookValidator();
+        public BookManager(BookStoreDbContext dbContext, IMapper mapper)
         {
             _dbContext = dbContext;
+            _mapper = mapper;
         }
 
         public List<BooksViewModel> GetAllBooks()
         {
                 var bookList=_dbContext.Books.OrderBy(x=>x.Id).ToList();
-                List<BooksViewModel> booksListViewModel=new List<BooksViewModel>();
-                foreach (var book in bookList)
-                {
-                    booksListViewModel.Add(new BooksViewModel()
-                    {
-                        Title=book.Title,
-                        Genre=((GenreEnum)book.GenreId).ToString(),
-                        PageCount=book.PageCount,
-                        DateTime=book.PublishDate.Date.ToString("yyyy/mm/dd")
-                        
-                    });
-                }
+                List<BooksViewModel> booksListViewModel=_mapper.Map<List<BooksViewModel>>(bookList);
+               
                 return booksListViewModel;
-        }
+        }  string message;
         public void AddBook(Book book)
-        {
-            var existBook=_dbContext.Books.Where(x=>x.Title==book.Title).SingleOrDefault();
+        { 
+          
+            validator.ValidateAndThrow(book);
+            
+            // if (results.IsValid)
+            // {
+                 var existBook=_dbContext.Books.Where(x=>x.Title==book.Title).SingleOrDefault();
             if (existBook is null)
             {
                 _dbContext.Books.Add(book);
                 _dbContext.SaveChanges();
             }
+            // }
+            // foreach (var item in results.Errors)
+            // {
+                
+            // message =  item.ErrorMessage ;
+             
+            // }
+            // return message;
 
         }
     }

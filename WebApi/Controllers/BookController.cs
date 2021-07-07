@@ -3,7 +3,9 @@ using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using WebApi;
 using WebApi.BusinessLogic;
+using AutoMapper;
 using WebApi.DataAccess;
+using WebApi.Entities;
 
 namespace WebApi.Controllers
 {
@@ -12,16 +14,18 @@ namespace WebApi.Controllers
     public class BookController:ControllerBase
     { 
        private readonly BookStoreDbContext _context;
+       private readonly IMapper _mapper;
 
-        public BookController(BookStoreDbContext context)
+        public BookController(BookStoreDbContext context, IMapper mapper )
         {
             _context = context;
+            _mapper = mapper;
         }
 
         [HttpGet]
         public IActionResult GetBooks()
         {
-            BookManager  _manager=new BookManager(_context);
+            BookManager  _manager=new BookManager(_context,_mapper);
            var result=  _manager.GetAllBooks();
            return Ok(result);
 
@@ -35,8 +39,14 @@ namespace WebApi.Controllers
         [HttpPost]
         public IActionResult AddBook(Book book)
         {
-             BookManager  _manager=new BookManager(_context);
-             _manager.AddBook(book);
+             BookManager  _manager=new BookManager(_context,_mapper);
+            
+            // var error=
+            _manager.AddBook(book);
+            // if (error is not null)
+            // {
+            //     return BadRequest(error);
+            // }
              return Ok();
         }
         [HttpPut]

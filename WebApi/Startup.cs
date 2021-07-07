@@ -11,8 +11,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using WebApi.DataAccess;
+using WebApi.Middlewares;
 
 namespace WebApi
 {
@@ -28,7 +30,9 @@ namespace WebApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+        
                 services.AddDbContext<BookStoreDbContext>(options => options.UseInMemoryDatabase(databaseName: "BookStoreDB"));
+            services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
@@ -48,11 +52,11 @@ namespace WebApi
             }
 
             app.UseHttpsRedirection();
-
+           app.UseCustomExceptionMiddleware();
             app.UseRouting();
 
             app.UseAuthorization();
-
+ 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
